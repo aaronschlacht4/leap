@@ -10,7 +10,7 @@ export const PHASES = [
   "blank", // pure white beneath the navbar
   "headline", // YOUR ROOM IS BORING
   "subline", // let's fix that.
-  "roomEmerge", // text fades, wall gains depth, floor line appears
+  "roomEmerge", // text fades, the flat white becomes a physical wall
   "light", // sunlight sweeps the wall (window shadow before window)
   "window", // window constructs itself into the wall
   "furniture", // room assembles piece by piece
@@ -28,7 +28,7 @@ export const PHASE_DURATIONS: Record<Phase, number> = {
   roomEmerge: 1050,
   light: 900,
   window: 1450,
-  furniture: 2250,
+  furniture: 1600,
   art: 1300,
   done: Infinity,
 };

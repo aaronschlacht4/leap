@@ -41,7 +41,7 @@ export default function Hero() {
 
         {/* Closing line + scroll cue once the room is complete */}
         <motion.div
-          className="pointer-events-none absolute inset-x-0 bottom-7 z-20 flex flex-col items-center gap-3 px-6 text-center"
+          className="pointer-events-none absolute inset-x-0 top-8 z-20 flex flex-col items-center gap-3 px-6 text-center"
           initial={{ opacity: 0, y: 10 }}
           animate={done ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 1.2, delay: 0.4, ease: EASE }}

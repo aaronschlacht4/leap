@@ -54,17 +54,17 @@ export default function SunlightLayer({ active }: Props) {
         </motion.div>
       </motion.div>
 
-      {/* Light pooling on the floor */}
+      {/* Wider ambient wash low on the wall */}
       <motion.div
         className="absolute"
         style={{
-          left: "22%",
-          bottom: "4%",
-          width: "min(30vw, 420px)",
-          height: "13%",
-          transform: "skewX(-42deg)",
-          filter: "blur(22px)",
-          backgroundColor: "rgba(255, 238, 206, 0.4)",
+          left: "18%",
+          bottom: "0%",
+          width: "min(44vw, 640px)",
+          height: "26%",
+          transform: "skewX(-30deg)",
+          filter: "blur(38px)",
+          backgroundColor: "rgba(255, 238, 206, 0.25)",
         }}
         initial={{ opacity: 0 }}
         animate={active ? { opacity: 1 } : {}}

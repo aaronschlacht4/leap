@@ -6,293 +6,304 @@ import { EASE } from "@/lib/timeline";
 
 type Props = { active: boolean };
 
-/** Seconds between each piece of furniture settling into place. */
-const STEP = 0.3;
+/** Seconds between each piece settling into place. */
+const STEP = 0.35;
 
-/** Rises a few pixels into place, then its floor shadow catches up. */
+/**
+ * POV composition: the viewer faces the wall straight on. No floor is
+ * visible — furniture is anchored to the bottom edge of the frame and
+ * cropped there. Sunlight comes from the window on the left, so every
+ * object casts a soft shadow to its right on the wall.
+ */
 function Settle({
   order,
   active,
   className,
   style,
-  shadowWidth = "86%",
   children,
 }: {
   order: number;
   active: boolean;
   className?: string;
   style?: CSSProperties;
-  shadowWidth?: string;
   children: ReactNode;
 }) {
   return (
     <motion.div
       className={`absolute ${className ?? ""}`}
       style={style}
-      initial={{ opacity: 0, y: 18 }}
+      initial={{ opacity: 0, y: 26 }}
       animate={active ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.7, delay: order * STEP, ease: EASE }}
+      transition={{ duration: 0.8, delay: order * STEP, ease: EASE }}
     >
       {children}
-      <motion.div
-        className="absolute left-1/2 -translate-x-1/2"
-        style={{
-          bottom: -7,
-          width: shadowWidth,
-          height: 10,
-          backgroundColor: "rgba(58, 46, 30, 0.20)",
-          filter: "blur(7px)",
-          borderRadius: "50%",
-        }}
-        initial={{ opacity: 0 }}
-        animate={active ? { opacity: 1 } : {}}
-        transition={{ duration: 0.6, delay: order * STEP + 0.3, ease: EASE }}
-      />
     </motion.div>
+  );
+}
+
+const WALL_SHADOW = {
+  filter:
+    "drop-shadow(16px 12px 22px rgba(70,55,35,0.22)) drop-shadow(4px 4px 8px rgba(70,55,35,0.10))",
+};
+
+function SofaSvg() {
+  return (
+    <svg viewBox="0 0 600 300" className="h-full w-full" style={WALL_SHADOW}>
+      <defs>
+        <linearGradient id="sofa-back" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#F1EADC" />
+          <stop offset="100%" stopColor="#E0D5C0" />
+        </linearGradient>
+        <linearGradient id="sofa-cushion" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#F4EEE0" />
+          <stop offset="70%" stopColor="#E9E0CC" />
+          <stop offset="100%" stopColor="#DDD1B9" />
+        </linearGradient>
+        <linearGradient id="sofa-seat" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#F6F0E2" />
+          <stop offset="100%" stopColor="#E6DCC6" />
+        </linearGradient>
+        <linearGradient id="sofa-arm" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#EAE1CE" />
+          <stop offset="100%" stopColor="#D9CDB4" />
+        </linearGradient>
+        <linearGradient id="sofa-base" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#E7DCC6" />
+          <stop offset="100%" stopColor="#D5C8AD" />
+        </linearGradient>
+        <linearGradient id="pillow-linen" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#EDE2CC" />
+          <stop offset="100%" stopColor="#D6C7A8" />
+        </linearGradient>
+        <linearGradient id="pillow-green" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#93A181" />
+          <stop offset="100%" stopColor="#6A785C" />
+        </linearGradient>
+      </defs>
+
+      {/* back frame */}
+      <rect x="34" y="16" width="532" height="130" rx="18" fill="url(#sofa-back)" />
+
+      {/* back cushions */}
+      {[46, 224, 402].map((x) => (
+        <g key={x}>
+          <rect x={x} y="28" width="152" height="112" rx="16" fill="url(#sofa-cushion)" />
+          {/* top-light highlight */}
+          <path
+            d={`M ${x + 10} 44 Q ${x + 76} 26 ${x + 142} 44 L ${x + 142} 52 Q ${x + 76} 36 ${x + 10} 52 Z`}
+            fill="#FFFFFF"
+            opacity="0.35"
+          />
+          {/* crease shadow at cushion base */}
+          <rect x={x + 6} y="130" width="140" height="10" rx="5" fill="#B9A98C" opacity="0.35" />
+        </g>
+      ))}
+
+      {/* arms */}
+      <rect x="0" y="64" width="66" height="236" rx="24" fill="url(#sofa-arm)" />
+      <rect x="534" y="64" width="66" height="236" rx="24" fill="url(#sofa-arm)" />
+      {/* arm inner-edge occlusion */}
+      <rect x="56" y="80" width="10" height="220" fill="#8A7B5F" opacity="0.14" />
+      <rect x="534" y="80" width="10" height="220" fill="#8A7B5F" opacity="0.14" />
+      {/* arm top highlights */}
+      <path d="M 8 74 Q 33 58 58 74 L 58 84 Q 33 68 8 84 Z" fill="#FFFFFF" opacity="0.4" />
+      <path d="M 542 74 Q 567 58 592 74 L 592 84 Q 567 68 542 84 Z" fill="#FFFFFF" opacity="0.4" />
+
+      {/* seat cushions */}
+      <rect x="60" y="146" width="238" height="62" rx="14" fill="url(#sofa-seat)" />
+      <rect x="302" y="146" width="238" height="62" rx="14" fill="url(#sofa-seat)" />
+      {/* seat front crease */}
+      <rect x="60" y="200" width="480" height="8" rx="4" fill="#A69575" opacity="0.28" />
+
+      {/* base — runs to the bottom edge (cropped by the viewport) */}
+      <rect x="34" y="206" width="532" height="94" fill="url(#sofa-base)" />
+      <rect x="34" y="206" width="532" height="6" fill="#8A7B5F" opacity="0.18" />
+
+      {/* throw pillows */}
+      <g transform="rotate(-8 128 118)">
+        <rect x="86" y="76" width="84" height="84" rx="18" fill="url(#pillow-linen)" />
+        <path d="M 96 92 Q 128 78 160 92 L 160 100 Q 128 86 96 100 Z" fill="#FFFFFF" opacity="0.4" />
+      </g>
+      <g transform="rotate(7 462 120)">
+        <rect x="420" y="80" width="82" height="82" rx="18" fill="url(#pillow-green)" />
+        <path d="M 430 96 Q 461 82 492 96 L 492 104 Q 461 90 430 104 Z" fill="#FFFFFF" opacity="0.28" />
+      </g>
+    </svg>
+  );
+}
+
+function PlantSvg() {
+  const leaves: Array<[number, number, number, number, string]> = [
+    // [cx, cy, length, rotation, gradient id]
+    [78, 130, 96, -38, "leaf-a"],
+    [140, 118, 104, 24, "leaf-b"],
+    [104, 92, 112, -8, "leaf-c"],
+    [62, 170, 78, -62, "leaf-b"],
+    [156, 162, 82, 55, "leaf-a"],
+    [122, 74, 88, 8, "leaf-d"],
+    [92, 108, 70, -22, "leaf-d"],
+  ];
+  return (
+    <svg viewBox="0 0 220 360" className="h-full w-full" style={WALL_SHADOW}>
+      <defs>
+        <linearGradient id="leaf-a" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#879972" />
+          <stop offset="100%" stopColor="#5C6B4E" />
+        </linearGradient>
+        <linearGradient id="leaf-b" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#758861" />
+          <stop offset="100%" stopColor="#4E5C42" />
+        </linearGradient>
+        <linearGradient id="leaf-c" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#93A57E" />
+          <stop offset="100%" stopColor="#66774F" />
+        </linearGradient>
+        <linearGradient id="leaf-d" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#9DAE88" />
+          <stop offset="100%" stopColor="#707F5B" />
+        </linearGradient>
+        <linearGradient id="pot-ceramic" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#EFE8D8" />
+          <stop offset="55%" stopColor="#E0D6C0" />
+          <stop offset="100%" stopColor="#C6B99E" />
+        </linearGradient>
+      </defs>
+
+      {/* stems */}
+      {leaves.map(([cx, cy], i) => (
+        <path
+          key={i}
+          d={`M 110 250 Q ${(110 + cx) / 2} ${cy + 60} ${cx} ${cy + 14}`}
+          fill="none"
+          stroke="#4E5B43"
+          strokeWidth="3.4"
+          strokeLinecap="round"
+        />
+      ))}
+
+      {/* leaves — oval blades with a midrib and side veins */}
+      {leaves.map(([cx, cy, len, rot, grad], i) => (
+        <g key={i} transform={`rotate(${rot} ${cx} ${cy})`}>
+          <ellipse cx={cx} cy={cy} rx={len * 0.30} ry={len * 0.52} fill={`url(#${grad})`} />
+          <line
+            x1={cx}
+            y1={cy - len * 0.48}
+            x2={cx}
+            y2={cy + len * 0.48}
+            stroke="#42503A"
+            strokeWidth="1.6"
+            opacity="0.55"
+          />
+          {[-0.28, -0.06, 0.18].map((t) => (
+            <path
+              key={t}
+              d={`M ${cx} ${cy + len * t} Q ${cx + len * 0.16} ${cy + len * (t - 0.1)} ${cx + len * 0.26} ${cy + len * (t - 0.16)}`}
+              fill="none"
+              stroke="#42503A"
+              strokeWidth="1"
+              opacity="0.35"
+            />
+          ))}
+          <ellipse
+            cx={cx - len * 0.1}
+            cy={cy - len * 0.18}
+            rx={len * 0.10}
+            ry={len * 0.26}
+            fill="#FFFFFF"
+            opacity="0.14"
+          />
+        </g>
+      ))}
+
+      {/* pot — cropped at the bottom of the frame */}
+      <path d="M 62 244 h 96 a 6 6 0 0 1 6 7 l -9 109 h -90 l -9 -109 a 6 6 0 0 1 6 -7 z" fill="url(#pot-ceramic)" />
+      <rect x="54" y="238" width="112" height="16" rx="8" fill="#E6DCC8" />
+      <rect x="54" y="238" width="112" height="16" rx="8" fill="#8A7B5F" opacity="0.1" />
+      <path d="M 66 260 l 7 96 h 8 l -8 -96 z" fill="#FFFFFF" opacity="0.25" />
+    </svg>
+  );
+}
+
+function LampSvg() {
+  return (
+    <svg viewBox="0 0 180 560" className="h-full w-full" style={WALL_SHADOW}>
+      <defs>
+        <linearGradient id="lamp-shade" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#DFD5BC" />
+          <stop offset="45%" stopColor="#F7F1E1" />
+          <stop offset="100%" stopColor="#D8CDB2" />
+        </linearGradient>
+        <radialGradient id="lamp-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="rgba(255,232,185,0.55)" />
+          <stop offset="100%" stopColor="rgba(255,232,185,0)" />
+        </radialGradient>
+      </defs>
+
+      {/* warm halo on the wall */}
+      <ellipse cx="90" cy="105" rx="115" ry="95" fill="url(#lamp-glow)" />
+
+      {/* drum shade — slight taper, cylindrical shading */}
+      <path d="M 34 28 h 112 l 10 118 h -132 z" fill="url(#lamp-shade)" />
+      <ellipse cx="90" cy="28" rx="56" ry="7" fill="#EDE5D1" />
+      <ellipse cx="90" cy="146" rx="66" ry="8" fill="#C9BDA1" opacity="0.6" />
+      {/* light spilling from the bottom of the shade */}
+      <ellipse cx="90" cy="152" rx="52" ry="10" fill="rgba(255,236,196,0.7)" />
+
+      {/* stem with a catch-light */}
+      <rect x="86" y="154" width="8" height="406" fill="#221E18" />
+      <rect x="87.5" y="154" width="2" height="406" fill="#5A5244" />
+      {/* finial */}
+      <rect x="84" y="150" width="12" height="8" rx="3" fill="#221E18" />
+    </svg>
   );
 }
 
 export default function FurnitureLayer({ active }: Props) {
   return (
     <div className="pointer-events-none absolute inset-0">
-      {/* 1 — floor becomes more defined: plank seams surface */}
-      <motion.div
-        className="absolute inset-x-0 bottom-0 h-[24%]"
+      {/* 1 — sofa, anchored to the bottom edge */}
+      <Settle
+        order={0}
+        active={active}
+        className="left-1/2 -translate-x-1/2 md:left-[53%]"
         style={{
-          backgroundImage:
-            "repeating-linear-gradient(90deg, rgba(92,72,48,0.10) 0 1px, transparent 1px 96px)",
+          bottom: "-1%",
+          width: "clamp(330px, 40vw, 640px)",
+          aspectRatio: "2 / 1",
         }}
-        initial={{ opacity: 0 }}
-        animate={active ? { opacity: 1 } : {}}
-        transition={{ duration: 1.1, ease: EASE }}
-      />
+      >
+        <SofaSvg />
+      </Settle>
 
-      {/* 2 — rug */}
+      {/* 2 — plant, slightly in front of the sofa's left arm */}
       <Settle
         order={1}
         active={active}
-        className="left-1/2 -translate-x-1/2 md:left-[53%]"
-        style={{ bottom: "5.5%", width: "min(90vw, 720px)", height: "8.5%" }}
-        shadowWidth="96%"
+        className="max-sm:left-[2%]!"
+        style={{
+          left: "27%",
+          bottom: "-1%",
+          width: "clamp(120px, 11vw, 190px)",
+          aspectRatio: "22 / 36",
+        }}
       >
-        <div
-          className="h-full w-full"
-          style={{
-            backgroundColor: "#E9E1D0",
-            border: "1px solid #DCD2BD",
-            boxShadow: "inset 0 0 24px rgba(120,100,70,0.10)",
-          }}
-        />
+        <PlantSvg />
       </Settle>
 
-      {/* 3 — low-profile sofa */}
+      {/* 3 — floor lamp (desktop only), base cropped by the frame */}
       <Settle
         order={2}
         active={active}
-        className="left-1/2 -translate-x-1/2 md:left-[53%]"
-        style={{
-          bottom: "9.5%",
-          width: "clamp(270px, 34vw, 540px)",
-          height: "clamp(104px, 11vw, 175px)",
-        }}
-      >
-        <div className="relative h-full w-full">
-          {/* back cushions */}
-          <div className="absolute inset-x-0 top-0 flex h-[42%] gap-[3px]">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="h-full flex-1"
-                style={{
-                  backgroundColor: "#E7DFCF",
-                  borderRadius: 3,
-                  boxShadow: "inset 0 -6px 10px rgba(110,90,60,0.12)",
-                }}
-              />
-            ))}
-          </div>
-          {/* seat */}
-          <div className="absolute inset-x-0 top-[42%] flex h-[28%] gap-[3px]">
-            {[0, 1].map((i) => (
-              <div
-                key={i}
-                className="h-full flex-1"
-                style={{
-                  backgroundColor: "#EDE6D6",
-                  borderRadius: 3,
-                  boxShadow: "inset 0 5px 8px rgba(110,90,60,0.08)",
-                }}
-              />
-            ))}
-          </div>
-          {/* base */}
-          <div
-            className="absolute inset-x-[1%] top-[70%] h-[18%]"
-            style={{ backgroundColor: "#E2DAC9", borderRadius: 2 }}
-          />
-          {/* legs */}
-          {["6%", "32%", "66%", "92%"].map((left) => (
-            <div
-              key={left}
-              className="absolute bottom-0 h-[12%] w-[3px]"
-              style={{ left, backgroundColor: "#26221D" }}
-            />
-          ))}
-          {/* throw pillows */}
-          <div
-            className="absolute left-[4%] top-[26%] h-[34%] w-[13%]"
-            style={{
-              backgroundColor: "#D9CBAF",
-              borderRadius: 3,
-              transform: "rotate(-7deg)",
-              boxShadow: "inset -4px -4px 8px rgba(110,90,60,0.14)",
-            }}
-          />
-          <div
-            className="absolute right-[5%] top-[28%] h-[32%] w-[12%]"
-            style={{
-              backgroundColor: "#7E8C6F",
-              borderRadius: 3,
-              transform: "rotate(6deg)",
-              boxShadow: "inset -4px -4px 8px rgba(50,60,40,0.22)",
-            }}
-          />
-        </div>
-      </Settle>
-
-      {/* 4 — side table, with decor (step 7) resting on its top */}
-      <div
-        className="absolute hidden md:block"
-        style={{
-          left: "75.5%",
-          bottom: "10%",
-          width: "clamp(74px, 6.5vw, 104px)",
-          height: "clamp(64px, 5.6vw, 90px)",
-        }}
-      >
-        <Settle order={3} active={active} className="inset-0">
-          <div className="relative h-full w-full">
-            <div
-              className="absolute inset-x-0 top-0 h-[10%]"
-              style={{ backgroundColor: "#B2946E", borderRadius: 2 }}
-            />
-            <div
-              className="absolute left-1/2 top-[10%] h-[76%] w-[7%] -translate-x-1/2"
-              style={{ backgroundColor: "#A5875F" }}
-            />
-            <div
-              className="absolute bottom-0 left-1/2 h-[6%] w-[52%] -translate-x-1/2"
-              style={{ backgroundColor: "#A5875F", borderRadius: "50%" }}
-            />
-          </div>
-        </Settle>
-
-        {/* 7 — small decor: stacked books and a vase on the tabletop */}
-        <Settle
-          order={6}
-          active={active}
-          style={{ bottom: "94%", left: "10%", width: "80%", height: "58%" }}
-          shadowWidth="0%"
-        >
-          <div className="relative h-full w-full">
-            <div
-              className="absolute bottom-0 left-0 h-[14%] w-[62%]"
-              style={{ backgroundColor: "#2C2823" }}
-            />
-            <div
-              className="absolute bottom-[14%] left-[4%] h-[13%] w-[56%]"
-              style={{ backgroundColor: "#C7B899" }}
-            />
-            <div
-              className="absolute bottom-[27%] left-[2%] h-[12%] w-[59%]"
-              style={{ backgroundColor: "#8A8478" }}
-            />
-            <div
-              className="absolute bottom-0 right-[4%] h-[52%] w-[22%]"
-              style={{ backgroundColor: "#CFC0A8", borderRadius: "40% 40% 8% 8%" }}
-            />
-            <div
-              className="absolute bottom-[48%] right-[12%] h-[52%] w-[1.5px]"
-              style={{ backgroundColor: "#7A6E58", transform: "rotate(8deg)" }}
-            />
-            <div
-              className="absolute bottom-[50%] right-[16%] h-[44%] w-[1.5px]"
-              style={{ backgroundColor: "#7A6E58", transform: "rotate(-10deg)" }}
-            />
-          </div>
-        </Settle>
-      </div>
-
-      {/* 5 — floor lamp (desktop only) */}
-      <Settle
-        order={4}
-        active={active}
         className="hidden md:block"
         style={{
-          left: "86%",
-          bottom: "10.5%",
-          width: "clamp(80px, 7vw, 120px)",
-          height: "clamp(210px, 24vw, 360px)",
+          left: "85%",
+          bottom: "-1%",
+          width: "clamp(96px, 8.5vw, 150px)",
+          aspectRatio: "18 / 56",
         }}
-        shadowWidth="55%"
       >
-        <div className="relative h-full w-full">
-          {/* soft glow behind the shade */}
-          <div
-            className="absolute left-1/2 top-[2%] h-[30%] w-[150%] -translate-x-1/2"
-            style={{
-              background:
-                "radial-gradient(ellipse at center, rgba(255,232,190,0.5) 0%, rgba(255,232,190,0) 68%)",
-            }}
-          />
-          {/* shade */}
-          <div
-            className="absolute left-1/2 top-0 h-[22%] w-[88%] -translate-x-1/2"
-            style={{
-              backgroundColor: "#F1EBDB",
-              clipPath: "polygon(14% 0, 86% 0, 100% 100%, 0 100%)",
-              boxShadow: "inset 0 -8px 12px rgba(120,100,60,0.16)",
-            }}
-          />
-          {/* pole + base */}
-          <div
-            className="absolute left-1/2 top-[22%] h-[74%] w-[2px] -translate-x-1/2"
-            style={{ backgroundColor: "#1E1B17" }}
-          />
-          <div
-            className="absolute bottom-0 left-1/2 h-[2.5%] w-[46%] -translate-x-1/2"
-            style={{ backgroundColor: "#1E1B17", borderRadius: "50%" }}
-          />
-        </div>
+        <LampSvg />
       </Settle>
-
-      {/* 6 — plant */}
-      <Settle
-        order={5}
-        active={active}
-        className="max-sm:left-[4%]!"
-        style={{
-          left: "27%",
-          bottom: "10.5%",
-          width: "clamp(84px, 8vw, 132px)",
-          height: "clamp(130px, 13vw, 210px)",
-        }}
-        shadowWidth="70%"
-      >
-        <svg viewBox="0 0 100 160" className="h-full w-full">
-          <g stroke="none">
-            <path d="M50 96 C 46 60 28 46 12 40 C 26 66 36 78 46 98 Z" fill="#6F8261" />
-            <path d="M50 98 C 52 56 66 40 86 32 C 74 62 60 78 54 100 Z" fill="#59684E" />
-            <path d="M49 100 C 44 72 40 52 46 28 C 56 52 56 76 53 100 Z" fill="#7E8F6E" />
-            <path d="M50 100 C 60 82 74 74 90 72 C 76 90 62 96 54 102 Z" fill="#6F8261" />
-            <path d="M50 100 C 40 84 26 78 10 78 C 24 94 40 98 47 103 Z" fill="#535F47" />
-          </g>
-          {/* pot */}
-          <path d="M30 100 H 70 L 65 152 H 35 Z" fill="#CDBFA5" />
-          <path d="M30 100 H 70 L 69 108 H 31 Z" fill="#C1B295" />
-        </svg>
-      </Settle>
-
     </div>
   );
 }

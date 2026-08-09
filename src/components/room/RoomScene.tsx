@@ -58,27 +58,16 @@ export default function RoomScene({
         transition={{ duration: 1.6, delay: 0.3, ease: EASE }}
       />
 
-      {/* Floor — the line surfaces first, then the plane reads as wood */}
+      {/* Grounding — soft occlusion where out-of-frame furniture meets the wall */}
       <motion.div
-        className="absolute inset-x-0 bottom-0 h-[24%]"
+        className="absolute inset-x-0 bottom-0 h-[14%]"
         style={{
-          backgroundColor: "#D9C6A8",
-          boxShadow: "inset 0 10px 18px rgba(96,78,52,0.16)",
+          background:
+            "linear-gradient(to top, rgba(96,78,52,0.13), rgba(96,78,52,0))",
         }}
         initial={{ opacity: 0 }}
         animate={emerge ? { opacity: 1 } : {}}
         transition={{ duration: 1.7, delay: 0.45, ease: EASE }}
-      />
-      {/* Baseboard */}
-      <motion.div
-        className="absolute inset-x-0 bottom-[24%] h-[10px]"
-        style={{
-          backgroundColor: "#FBFAF6",
-          boxShadow: "0 2px 4px rgba(96,78,52,0.14)",
-        }}
-        initial={{ opacity: 0 }}
-        animate={emerge ? { opacity: 1 } : {}}
-        transition={{ duration: 1.4, delay: 0.55, ease: EASE }}
       />
 
       <SunlightLayer active={light} />
