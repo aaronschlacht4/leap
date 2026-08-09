@@ -10,10 +10,10 @@ type Props = { active: boolean };
 const STEP = 0.35;
 
 /**
- * POV composition: the viewer faces the wall straight on. No floor is
- * visible — furniture is anchored to the bottom edge of the frame and
- * cropped there. Sunlight comes from the window on the left, so every
- * object casts a soft shadow to its right on the wall.
+ * POV composition: the viewer faces the white wall straight on. No floor
+ * is visible — furniture anchors to the bottom edge of the frame and is
+ * cropped there. Window light comes from the left, so objects cast soft
+ * neutral shadows to their right.
  */
 function Settle({
   order,
@@ -43,183 +43,222 @@ function Settle({
 
 const WALL_SHADOW = {
   filter:
-    "drop-shadow(16px 12px 22px rgba(70,55,35,0.22)) drop-shadow(4px 4px 8px rgba(70,55,35,0.10))",
+    "drop-shadow(14px 12px 20px rgba(50,48,42,0.20)) drop-shadow(4px 4px 8px rgba(50,48,42,0.10))",
 };
 
 function SofaSvg() {
   return (
     <svg viewBox="0 0 600 300" className="h-full w-full" style={WALL_SHADOW}>
       <defs>
-        <linearGradient id="sofa-back" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#F1EADC" />
-          <stop offset="100%" stopColor="#E0D5C0" />
+        <linearGradient id="sf-back" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#F1EFE9" />
+          <stop offset="100%" stopColor="#DFDBD0" />
         </linearGradient>
-        <linearGradient id="sofa-cushion" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#F4EEE0" />
-          <stop offset="70%" stopColor="#E9E0CC" />
-          <stop offset="100%" stopColor="#DDD1B9" />
+        <linearGradient id="sf-cushion" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#F5F3ED" />
+          <stop offset="100%" stopColor="#E2DED2" />
         </linearGradient>
-        <linearGradient id="sofa-seat" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#F6F0E2" />
-          <stop offset="100%" stopColor="#E6DCC6" />
+        <linearGradient id="sf-seat" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#F7F5EF" />
+          <stop offset="100%" stopColor="#E6E2D6" />
         </linearGradient>
-        <linearGradient id="sofa-arm" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#EAE1CE" />
-          <stop offset="100%" stopColor="#D9CDB4" />
+        <linearGradient id="sf-arm" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#EEEBE3" />
+          <stop offset="100%" stopColor="#D8D4C8" />
         </linearGradient>
-        <linearGradient id="sofa-base" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#E7DCC6" />
-          <stop offset="100%" stopColor="#D5C8AD" />
+        <linearGradient id="sf-base" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#E7E3D8" />
+          <stop offset="100%" stopColor="#D2CDC0" />
         </linearGradient>
-        <linearGradient id="pillow-linen" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#EDE2CC" />
-          <stop offset="100%" stopColor="#D6C7A8" />
+        <linearGradient id="pl-linen" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#EBE5D7" />
+          <stop offset="100%" stopColor="#D1C9B5" />
         </linearGradient>
-        <linearGradient id="pillow-green" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#93A181" />
-          <stop offset="100%" stopColor="#6A785C" />
+        <linearGradient id="pl-green" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#8F9B81" />
+          <stop offset="100%" stopColor="#646F58" />
         </linearGradient>
+        {/* soft blur for shading shapes — no hard cartoon edges */}
+        <filter id="sf-soft" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="5" />
+        </filter>
+        <filter id="sf-softer" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="9" />
+        </filter>
+        {/* woven fabric grain */}
+        <filter id="sf-grain">
+          <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.32  0 0 0 0 0.30  0 0 0 0 0.26  0 0 0 0.07 0"
+          />
+        </filter>
+        <clipPath id="sf-clip">
+          <rect x="34" y="16" width="532" height="130" rx="18" />
+          <rect x="0" y="64" width="66" height="236" rx="24" />
+          <rect x="534" y="64" width="66" height="236" rx="24" />
+          <rect x="34" y="146" width="532" height="154" rx="10" />
+        </clipPath>
       </defs>
 
       {/* back frame */}
-      <rect x="34" y="16" width="532" height="130" rx="18" fill="url(#sofa-back)" />
+      <rect x="34" y="16" width="532" height="130" rx="18" fill="url(#sf-back)" />
 
-      {/* back cushions */}
-      {[46, 224, 402].map((x) => (
+      {/* back cushions — domed tops, blurred creases beneath */}
+      {[48, 226, 404].map((x) => (
         <g key={x}>
-          <rect x={x} y="28" width="152" height="112" rx="16" fill="url(#sofa-cushion)" />
-          {/* top-light highlight */}
-          <path
-            d={`M ${x + 10} 44 Q ${x + 76} 26 ${x + 142} 44 L ${x + 142} 52 Q ${x + 76} 36 ${x + 10} 52 Z`}
-            fill="#FFFFFF"
-            opacity="0.35"
-          />
-          {/* crease shadow at cushion base */}
-          <rect x={x + 6} y="130" width="140" height="10" rx="5" fill="#B9A98C" opacity="0.35" />
+          <rect x={x} y="28" width="148" height="112" rx="18" fill="url(#sf-cushion)" />
+          <ellipse cx={x + 74} cy="38" rx="62" ry="12" fill="#FFFFFF" opacity="0.55" filter="url(#sf-soft)" />
+          <rect x={x + 8} y="126" width="132" height="12" rx="6" fill="#8E866F" opacity="0.30" filter="url(#sf-soft)" />
+          {/* side compression creases */}
+          <rect x={x + 2} y="52" width="6" height="70" rx="3" fill="#8E866F" opacity="0.18" filter="url(#sf-soft)" />
+          <rect x={x + 140} y="52" width="6" height="70" rx="3" fill="#8E866F" opacity="0.18" filter="url(#sf-soft)" />
         </g>
       ))}
 
       {/* arms */}
-      <rect x="0" y="64" width="66" height="236" rx="24" fill="url(#sofa-arm)" />
-      <rect x="534" y="64" width="66" height="236" rx="24" fill="url(#sofa-arm)" />
-      {/* arm inner-edge occlusion */}
-      <rect x="56" y="80" width="10" height="220" fill="#8A7B5F" opacity="0.14" />
-      <rect x="534" y="80" width="10" height="220" fill="#8A7B5F" opacity="0.14" />
-      {/* arm top highlights */}
-      <path d="M 8 74 Q 33 58 58 74 L 58 84 Q 33 68 8 84 Z" fill="#FFFFFF" opacity="0.4" />
-      <path d="M 542 74 Q 567 58 592 74 L 592 84 Q 567 68 542 84 Z" fill="#FFFFFF" opacity="0.4" />
+      <rect x="0" y="64" width="66" height="236" rx="24" fill="url(#sf-arm)" />
+      <rect x="534" y="64" width="66" height="236" rx="24" fill="url(#sf-arm)" />
+      <rect x="52" y="84" width="14" height="216" fill="#867E68" opacity="0.16" filter="url(#sf-soft)" />
+      <rect x="534" y="84" width="14" height="216" fill="#867E68" opacity="0.16" filter="url(#sf-soft)" />
+      <ellipse cx="33" cy="72" rx="26" ry="10" fill="#FFFFFF" opacity="0.6" filter="url(#sf-soft)" />
+      <ellipse cx="567" cy="72" rx="26" ry="10" fill="#FFFFFF" opacity="0.6" filter="url(#sf-soft)" />
 
       {/* seat cushions */}
-      <rect x="60" y="146" width="238" height="62" rx="14" fill="url(#sofa-seat)" />
-      <rect x="302" y="146" width="238" height="62" rx="14" fill="url(#sofa-seat)" />
+      <rect x="60" y="146" width="238" height="62" rx="14" fill="url(#sf-seat)" />
+      <rect x="302" y="146" width="238" height="62" rx="14" fill="url(#sf-seat)" />
+      <ellipse cx="179" cy="154" rx="100" ry="9" fill="#FFFFFF" opacity="0.5" filter="url(#sf-soft)" />
+      <ellipse cx="421" cy="154" rx="100" ry="9" fill="#FFFFFF" opacity="0.5" filter="url(#sf-soft)" />
+      {/* gap between seat cushions */}
+      <rect x="296" y="150" width="8" height="56" rx="4" fill="#8E866F" opacity="0.22" filter="url(#sf-soft)" />
       {/* seat front crease */}
-      <rect x="60" y="200" width="480" height="8" rx="4" fill="#A69575" opacity="0.28" />
+      <rect x="56" y="200" width="488" height="10" rx="5" fill="#8E866F" opacity="0.26" filter="url(#sf-soft)" />
 
-      {/* base — runs to the bottom edge (cropped by the viewport) */}
-      <rect x="34" y="206" width="532" height="94" fill="url(#sofa-base)" />
-      <rect x="34" y="206" width="532" height="6" fill="#8A7B5F" opacity="0.18" />
+      {/* base — runs off the bottom edge of the frame */}
+      <rect x="34" y="206" width="532" height="94" fill="url(#sf-base)" />
+      <rect x="34" y="206" width="532" height="8" fill="#6E6752" opacity="0.14" filter="url(#sf-soft)" />
 
-      {/* throw pillows */}
+      {/* throw pillows — slouched, softly shaded */}
       <g transform="rotate(-8 128 118)">
-        <rect x="86" y="76" width="84" height="84" rx="18" fill="url(#pillow-linen)" />
-        <path d="M 96 92 Q 128 78 160 92 L 160 100 Q 128 86 96 100 Z" fill="#FFFFFF" opacity="0.4" />
+        <rect x="86" y="76" width="84" height="84" rx="22" fill="url(#pl-linen)" />
+        <ellipse cx="128" cy="90" rx="34" ry="9" fill="#FFFFFF" opacity="0.5" filter="url(#sf-soft)" />
+        <rect x="92" y="140" width="72" height="12" rx="6" fill="#8E866F" opacity="0.28" filter="url(#sf-soft)" />
       </g>
       <g transform="rotate(7 462 120)">
-        <rect x="420" y="80" width="82" height="82" rx="18" fill="url(#pillow-green)" />
-        <path d="M 430 96 Q 461 82 492 96 L 492 104 Q 461 90 430 104 Z" fill="#FFFFFF" opacity="0.28" />
+        <rect x="420" y="80" width="82" height="82" rx="22" fill="url(#pl-green)" />
+        <ellipse cx="461" cy="94" rx="33" ry="9" fill="#FFFFFF" opacity="0.30" filter="url(#sf-soft)" />
+        <rect x="426" y="142" width="70" height="12" rx="6" fill="#3C4433" opacity="0.35" filter="url(#sf-soft)" />
       </g>
+
+      {/* ambient occlusion where the back meets the seat */}
+      <rect x="44" y="136" width="512" height="14" rx="7" fill="#6E6752" opacity="0.16" filter="url(#sf-softer)" />
+
+      {/* woven texture across the whole silhouette */}
+      <rect x="0" y="0" width="600" height="300" clipPath="url(#sf-clip)" filter="url(#sf-grain)" opacity="0.5" />
     </svg>
   );
 }
 
+/** Monstera leaf instances: [x, y, rotation, scale, brightness] */
+const LEAVES: Array<[number, number, number, number, number]> = [
+  [70, 158, -30, 0.85, 0.94],
+  [152, 152, 28, 0.9, 1],
+  [110, 122, -4, 1.02, 1.05],
+  [52, 198, -56, 0.62, 0.88],
+  [166, 200, 52, 0.68, 0.9],
+  [130, 108, 12, 0.72, 1.08],
+];
+
 function PlantSvg() {
-  const leaves: Array<[number, number, number, number, string]> = [
-    // [cx, cy, length, rotation, gradient id]
-    [78, 130, 96, -38, "leaf-a"],
-    [140, 118, 104, 24, "leaf-b"],
-    [104, 92, 112, -8, "leaf-c"],
-    [62, 170, 78, -62, "leaf-b"],
-    [156, 162, 82, 55, "leaf-a"],
-    [122, 74, 88, 8, "leaf-d"],
-    [92, 108, 70, -22, "leaf-d"],
-  ];
   return (
     <svg viewBox="0 0 220 360" className="h-full w-full" style={WALL_SHADOW}>
       <defs>
-        <linearGradient id="leaf-a" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#879972" />
-          <stop offset="100%" stopColor="#5C6B4E" />
+        <linearGradient id="mon-leaf" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#84956E" />
+          <stop offset="100%" stopColor="#4F5D44" />
         </linearGradient>
-        <linearGradient id="leaf-b" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#758861" />
-          <stop offset="100%" stopColor="#4E5C42" />
+        <linearGradient id="mon-pot" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#F0EEE9" />
+          <stop offset="55%" stopColor="#DAD6CB" />
+          <stop offset="100%" stopColor="#BFBAAC" />
         </linearGradient>
-        <linearGradient id="leaf-c" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#93A57E" />
-          <stop offset="100%" stopColor="#66774F" />
-        </linearGradient>
-        <linearGradient id="leaf-d" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#9DAE88" />
-          <stop offset="100%" stopColor="#707F5B" />
-        </linearGradient>
-        <linearGradient id="pot-ceramic" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#EFE8D8" />
-          <stop offset="55%" stopColor="#E0D6C0" />
-          <stop offset="100%" stopColor="#C6B99E" />
-        </linearGradient>
+        <filter id="mon-soft" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="7" />
+        </filter>
+        {/* Monstera silhouette: heart-shaped blade, edge slits, midrib holes */}
+        <mask id="mon-mask" maskUnits="userSpaceOnUse" x="-62" y="-142" width="124" height="154">
+          <path
+            d="M 0 2 C -10 -2 -30 -10 -40 -30 C -50 -50 -52 -82 -42 -102 C -32 -120 -14 -126 0 -126 C 14 -126 32 -120 42 -102 C 52 -82 50 -50 40 -30 C 30 -10 10 -2 0 2 Z"
+            fill="#FFFFFF"
+          />
+          <path d="M -48 -40 L -7 -52 L -46 -60 Z" fill="#000000" />
+          <path d="M -50 -68 L -7 -78 L -48 -86 Z" fill="#000000" />
+          <path d="M -44 -96 L -7 -100 L -38 -110 Z" fill="#000000" />
+          <path d="M 48 -54 L 7 -64 L 46 -72 Z" fill="#000000" />
+          <path d="M 50 -82 L 7 -90 L 46 -98 Z" fill="#000000" />
+          <path d="M 42 -108 L 7 -108 L 36 -118 Z" fill="#000000" />
+          <circle cx="-12" cy="-68" r="3.2" fill="#000000" />
+          <circle cx="10" cy="-86" r="2.8" fill="#000000" />
+          <circle cx="13" cy="-58" r="2.4" fill="#000000" />
+        </mask>
+        <g id="mon-blade">
+          <g mask="url(#mon-mask)">
+            <rect x="-62" y="-142" width="124" height="154" fill="url(#mon-leaf)" />
+            <path d="M 0 0 L 0 -120" stroke="#3F4B37" strokeWidth="2.4" opacity="0.6" fill="none" />
+            {[-32, -56, -80, -102].map((t) => (
+              <g key={t}>
+                <path
+                  d={`M 0 ${t} Q -18 ${t - 8} -36 ${t - 13}`}
+                  stroke="#3F4B37"
+                  strokeWidth="1.1"
+                  opacity="0.4"
+                  fill="none"
+                />
+                <path
+                  d={`M 0 ${t - 12} Q 18 ${t - 20} 36 ${t - 25}`}
+                  stroke="#3F4B37"
+                  strokeWidth="1.1"
+                  opacity="0.4"
+                  fill="none"
+                />
+              </g>
+            ))}
+            {/* sheen along the upper-left of the blade */}
+            <ellipse cx="-14" cy="-92" rx="18" ry="34" fill="#FFFFFF" opacity="0.12" />
+          </g>
+        </g>
       </defs>
 
       {/* stems */}
-      {leaves.map(([cx, cy], i) => (
+      {LEAVES.map(([x, y], i) => (
         <path
           key={i}
-          d={`M 110 250 Q ${(110 + cx) / 2} ${cy + 60} ${cx} ${cy + 14}`}
+          d={`M 110 258 Q ${(110 + x) / 2} ${y + 66} ${x} ${y + 4}`}
           fill="none"
-          stroke="#4E5B43"
-          strokeWidth="3.4"
+          stroke="#41503A"
+          strokeWidth="4.4"
           strokeLinecap="round"
         />
       ))}
 
-      {/* leaves — oval blades with a midrib and side veins */}
-      {leaves.map(([cx, cy, len, rot, grad], i) => (
-        <g key={i} transform={`rotate(${rot} ${cx} ${cy})`}>
-          <ellipse cx={cx} cy={cy} rx={len * 0.30} ry={len * 0.52} fill={`url(#${grad})`} />
-          <line
-            x1={cx}
-            y1={cy - len * 0.48}
-            x2={cx}
-            y2={cy + len * 0.48}
-            stroke="#42503A"
-            strokeWidth="1.6"
-            opacity="0.55"
-          />
-          {[-0.28, -0.06, 0.18].map((t) => (
-            <path
-              key={t}
-              d={`M ${cx} ${cy + len * t} Q ${cx + len * 0.16} ${cy + len * (t - 0.1)} ${cx + len * 0.26} ${cy + len * (t - 0.16)}`}
-              fill="none"
-              stroke="#42503A"
-              strokeWidth="1"
-              opacity="0.35"
-            />
-          ))}
-          <ellipse
-            cx={cx - len * 0.1}
-            cy={cy - len * 0.18}
-            rx={len * 0.10}
-            ry={len * 0.26}
-            fill="#FFFFFF"
-            opacity="0.14"
-          />
-        </g>
+      {/* dark interior mass — occlusion between overlapping leaves */}
+      <ellipse cx="110" cy="170" rx="46" ry="56" fill="#39452F" opacity="0.4" filter="url(#mon-soft)" />
+
+      {/* leaves */}
+      {LEAVES.map(([x, y, rot, s, b], i) => (
+        <use
+          key={i}
+          href="#mon-blade"
+          transform={`translate(${x} ${y}) rotate(${rot}) scale(${s})`}
+          style={{ filter: `brightness(${b})` }}
+        />
       ))}
 
-      {/* pot — cropped at the bottom of the frame */}
-      <path d="M 62 244 h 96 a 6 6 0 0 1 6 7 l -9 109 h -90 l -9 -109 a 6 6 0 0 1 6 -7 z" fill="url(#pot-ceramic)" />
-      <rect x="54" y="238" width="112" height="16" rx="8" fill="#E6DCC8" />
-      <rect x="54" y="238" width="112" height="16" rx="8" fill="#8A7B5F" opacity="0.1" />
-      <path d="M 66 260 l 7 96 h 8 l -8 -96 z" fill="#FFFFFF" opacity="0.25" />
+      {/* pot — matte ceramic, cropped by the bottom of the frame */}
+      <path d="M 60 252 h 100 a 6 6 0 0 1 6 7 l -10 101 h -92 l -10 -101 a 6 6 0 0 1 6 -7 z" fill="url(#mon-pot)" />
+      <rect x="52" y="246" width="116" height="16" rx="8" fill="#E4E1D8" />
+      <rect x="52" y="256" width="116" height="6" fill="#6E6752" opacity="0.12" filter="url(#mon-soft)" />
+      <path d="M 68 268 l 8 92 h 9 l -9 -92 z" fill="#FFFFFF" opacity="0.3" />
     </svg>
   );
 }
@@ -228,32 +267,34 @@ function LampSvg() {
   return (
     <svg viewBox="0 0 180 560" className="h-full w-full" style={WALL_SHADOW}>
       <defs>
-        <linearGradient id="lamp-shade" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#DFD5BC" />
-          <stop offset="45%" stopColor="#F7F1E1" />
-          <stop offset="100%" stopColor="#D8CDB2" />
+        <linearGradient id="lp-shade" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#DDD8CB" />
+          <stop offset="45%" stopColor="#F6F2E8" />
+          <stop offset="100%" stopColor="#D5D0C1" />
         </linearGradient>
-        <radialGradient id="lamp-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="rgba(255,232,185,0.55)" />
-          <stop offset="100%" stopColor="rgba(255,232,185,0)" />
+        <radialGradient id="lp-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="rgba(255,235,195,0.5)" />
+          <stop offset="100%" stopColor="rgba(255,235,195,0)" />
         </radialGradient>
+        <filter id="lp-soft" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="4" />
+        </filter>
       </defs>
 
       {/* warm halo on the wall */}
-      <ellipse cx="90" cy="105" rx="115" ry="95" fill="url(#lamp-glow)" />
+      <ellipse cx="90" cy="105" rx="115" ry="95" fill="url(#lp-glow)" />
 
-      {/* drum shade — slight taper, cylindrical shading */}
-      <path d="M 34 28 h 112 l 10 118 h -132 z" fill="url(#lamp-shade)" />
-      <ellipse cx="90" cy="28" rx="56" ry="7" fill="#EDE5D1" />
-      <ellipse cx="90" cy="146" rx="66" ry="8" fill="#C9BDA1" opacity="0.6" />
+      {/* drum shade — cylindrical shading, soft rims */}
+      <path d="M 34 28 h 112 l 10 118 h -132 z" fill="url(#lp-shade)" />
+      <ellipse cx="90" cy="28" rx="56" ry="7" fill="#ECE8DC" />
+      <ellipse cx="90" cy="146" rx="66" ry="8" fill="#B9B3A1" opacity="0.55" filter="url(#lp-soft)" />
       {/* light spilling from the bottom of the shade */}
-      <ellipse cx="90" cy="152" rx="52" ry="10" fill="rgba(255,236,196,0.7)" />
+      <ellipse cx="90" cy="152" rx="52" ry="10" fill="rgba(255,238,200,0.65)" filter="url(#lp-soft)" />
 
       {/* stem with a catch-light */}
-      <rect x="86" y="154" width="8" height="406" fill="#221E18" />
-      <rect x="87.5" y="154" width="2" height="406" fill="#5A5244" />
-      {/* finial */}
-      <rect x="84" y="150" width="12" height="8" rx="3" fill="#221E18" />
+      <rect x="86" y="154" width="8" height="406" fill="#221F1A" />
+      <rect x="87.5" y="154" width="2" height="406" fill="#57503F" />
+      <rect x="84" y="150" width="12" height="8" rx="3" fill="#221F1A" />
     </svg>
   );
 }
@@ -275,7 +316,7 @@ export default function FurnitureLayer({ active }: Props) {
         <SofaSvg />
       </Settle>
 
-      {/* 2 — plant, slightly in front of the sofa's left arm */}
+      {/* 2 — monstera, slightly in front of the sofa's left arm */}
       <Settle
         order={1}
         active={active}

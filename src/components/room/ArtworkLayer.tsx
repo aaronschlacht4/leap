@@ -78,7 +78,7 @@ export default function ArtworkLayer({ active }: Props) {
             transition={{ duration: 0.7, delay: piece.delay + 0.35, ease: EASE }}
             style={{
               boxShadow:
-                "10px 16px 30px rgba(58,46,30,0.26), 3px 6px 12px rgba(58,46,30,0.14)",
+                "10px 16px 30px rgba(45,43,38,0.24), 3px 6px 12px rgba(45,43,38,0.13)",
             }}
           />
 

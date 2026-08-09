@@ -18,13 +18,8 @@ export default function SunlightLayer({ active }: Props) {
       animate={active ? { opacity: 1 } : {}}
       transition={{ duration: 2.2, ease: EASE }}
     >
-      {/* Warm cast over the whole scene */}
-      <div
-        className="absolute inset-0 mix-blend-multiply"
-        style={{ backgroundColor: "rgba(255, 236, 205, 0.16)" }}
-      />
-
-      {/* Window-shaped light on the wall, right of where the window will form */}
+      {/* Window-shaped light on the wall, right of where the window will form.
+          The light itself carries the warmth — the wall paint stays white. */}
       <motion.div
         className="absolute"
         style={{

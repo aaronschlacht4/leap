@@ -30,9 +30,9 @@ export default function Window({ active }: Props) {
       <motion.div
         className="absolute inset-0"
         style={{
-          backgroundColor: "#EFEAE1",
+          backgroundColor: "#ECEBE7",
           boxShadow:
-            "inset 6px 6px 14px rgba(60,50,35,0.18), inset -3px -3px 8px rgba(60,50,35,0.08)",
+            "inset 7px 7px 16px rgba(45,43,38,0.20), inset -3px -3px 8px rgba(45,43,38,0.08)",
         }}
         initial={{ opacity: 0 }}
         animate={active ? { opacity: 1 } : {}}
@@ -52,6 +52,12 @@ export default function Window({ active }: Props) {
           className="h-full w-full"
         >
           <defs>
+            <filter id="win-haze" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="2" />
+            </filter>
+            <filter id="win-haze-lite" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="0.8" />
+            </filter>
             <linearGradient id="win-sky" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#C9DCE6" />
               <stop offset="60%" stopColor="#E3EEEF" />
@@ -79,11 +85,12 @@ export default function Window({ active }: Props) {
           <rect width="200" height="280" fill="url(#win-sky)" />
           <ellipse cx="150" cy="70" rx="90" ry="70" fill="url(#win-sun)" />
 
-          {/* Distant treeline — soft, hazy */}
+          {/* Distant treeline — blurred by atmosphere */}
           <path
             d="M0 152 Q 18 132 42 144 Q 62 122 90 138 Q 112 120 140 134 Q 164 118 184 132 Q 194 128 200 134 V 280 H 0 Z"
             fill="url(#tree-far)"
-            opacity="0.8"
+            opacity="0.65"
+            filter="url(#win-haze)"
           />
 
           {/* Mid canopy — irregular organic mass */}
@@ -91,17 +98,17 @@ export default function Window({ active }: Props) {
             d="M-8 196 Q 8 168 28 176 Q 36 152 62 162 Q 76 144 98 158 Q 118 140 138 156 Q 158 146 172 162 Q 190 156 208 176 V 280 H -8 Z"
             fill="url(#tree-near)"
           />
-          {/* canopy texture clumps */}
-          <ellipse cx="52" cy="180" rx="26" ry="16" fill="#546547" opacity="0.5" />
-          <ellipse cx="118" cy="172" rx="30" ry="18" fill="#546547" opacity="0.4" />
-          <ellipse cx="170" cy="184" rx="22" ry="14" fill="#546547" opacity="0.45" />
+          {/* canopy texture clumps — softened, no hard cartoon edges */}
+          <ellipse cx="52" cy="180" rx="26" ry="16" fill="#546547" opacity="0.5" filter="url(#win-haze-lite)" />
+          <ellipse cx="118" cy="172" rx="30" ry="18" fill="#546547" opacity="0.4" filter="url(#win-haze-lite)" />
+          <ellipse cx="170" cy="184" rx="22" ry="14" fill="#546547" opacity="0.45" filter="url(#win-haze-lite)" />
 
           {/* Foreground tree with trunk and layered crown */}
           <rect x="60" y="196" width="5" height="52" rx="2" fill="#66543F" />
           <path d="M 62 196 q -3 -14 2 -26" fill="none" stroke="#66543F" strokeWidth="3" />
-          <ellipse cx="63" cy="158" rx="34" ry="26" fill="#5E7050" />
-          <ellipse cx="48" cy="150" rx="20" ry="15" fill="#72855F" />
-          <ellipse cx="78" cy="148" rx="18" ry="13" fill="#526344" opacity="0.85" />
+          <ellipse cx="63" cy="158" rx="34" ry="26" fill="#5E7050" filter="url(#win-haze-lite)" />
+          <ellipse cx="48" cy="150" rx="20" ry="15" fill="#72855F" filter="url(#win-haze-lite)" />
+          <ellipse cx="78" cy="148" rx="18" ry="13" fill="#526344" opacity="0.85" filter="url(#win-haze-lite)" />
 
           {/* Ground falling toward the house */}
           <rect y="236" width="200" height="44" fill="url(#win-ground)" />
