@@ -55,6 +55,7 @@ export default function WallScene3D({ light, art }: Props) {
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.92;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -72,17 +73,17 @@ export default function WallScene3D({ light, art }: Props) {
     // The wall — a physical white surface that receives real shadows
     const wall = new THREE.Mesh(
       new THREE.PlaneGeometry(40, 24),
-      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.94, metalness: 0, envMapIntensity: 0.12 })
+      new THREE.MeshStandardMaterial({ color: 0xf5f4f1, roughness: 0.96, metalness: 0, envMapIntensity: 0.1 })
     );
     wall.position.z = -0.012;
     wall.receiveShadow = true;
     scene.add(wall);
 
     // Lighting — ambient base always on; warm key builds during `light`
-    const hemi = new THREE.HemisphereLight(0xffffff, 0xcfcabe, 0.45);
+    const hemi = new THREE.HemisphereLight(0xffffff, 0xd6d1c6, 0.5);
     scene.add(hemi);
     const key = new THREE.DirectionalLight(0xffeed8, 0);
-    key.position.set(-4.4, 3.4, 2.8);
+    key.position.set(-3.5, 3.0, 3.2);
     key.castShadow = true;
     key.shadow.mapSize.set(2048, 2048);
     key.shadow.camera.left = -3;
@@ -92,17 +93,17 @@ export default function WallScene3D({ light, art }: Props) {
     key.shadow.camera.near = 0.5;
     key.shadow.camera.far = 12;
     key.shadow.bias = -0.0004;
-    key.shadow.radius = 5;
+    key.shadow.radius = 7;
     scene.add(key);
     const fill = new THREE.DirectionalLight(0xffffff, 0);
     fill.position.set(2.6, 1.2, 3.4);
     scene.add(fill);
 
     const camera = new THREE.PerspectiveCamera(40, 1, 0.01, 100);
-    const FRAME_W = 2.5; // world width the frame needs on screen (with margin)
+    const FRAME_W = 2.9; // world width the frame needs on screen (with margin)
     const placeCamera = () => {
       const aspect = camera.aspect;
-      const base = 3.7;
+      const base = 5.1;
       const forWidth = FRAME_W / (2 * Math.tan((camera.fov / 2) * Math.PI / 180) * aspect);
       camera.position.set(0, 0, Math.max(base, forWidth));
       camera.lookAt(0, 0, 0);
@@ -144,9 +145,9 @@ export default function WallScene3D({ light, art }: Props) {
       if (lightStart !== null) {
         const p = clamp01((now - lightStart) / 1000 / LIGHT_DUR);
         const e = easeOut(p);
-        key.intensity = 2.6 * e;
-        fill.intensity = 0.35 * e;
-        key.position.x = -5.1 + 0.9 * e;
+        key.intensity = 1.6 * e;
+        fill.intensity = 0.3 * e;
+        key.position.x = -4.2 + 0.7 * e;
         if (p < 1) busy = true;
       }
 
@@ -157,9 +158,10 @@ export default function WallScene3D({ light, art }: Props) {
         const hp = easeOut(clamp01(t / HANG_DUR));
         artGroup.position.y = 0.06 + 0.16 * (1 - hp);
         artGroup.scale.setScalar(0.97 + 0.03 * hp);
-        // then the parts fly into formation
+        // then the parts fly into formation — hidden until their turn
         for (const a of anims) {
           const p = clamp01((t - a.delay) / a.dur);
+          a.node.visible = p > 0;
           const e = easeOut(p);
           a.node.position.lerpVectors(a.fromPos, a.basePos, e);
           a.node.quaternion.slerpQuaternions(a.fromQuat, a.baseQuat, e);
@@ -246,6 +248,7 @@ export default function WallScene3D({ light, art }: Props) {
           const fromQuat = baseQuat.clone().multiply(spin);
           node.position.copy(fromPos);
           node.quaternion.copy(fromQuat);
+          node.visible = false;
           anims.push({ node, basePos, baseQuat, fromPos, fromQuat, delay: part.delay, dur: part.dur });
           node.traverse((c) => {
             const m = (c as THREE.Mesh).material as THREE.Material & { opacity: number };
