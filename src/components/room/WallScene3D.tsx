@@ -80,16 +80,16 @@ export default function WallScene3D({ light, art }: Props) {
     scene.add(wall);
 
     // Lighting — ambient base always on; warm key builds during `light`
-    const hemi = new THREE.HemisphereLight(0xffffff, 0xb8b2a6, 0.42);
+    const hemi = new THREE.HemisphereLight(0xffffff, 0xb8b2a6, 0.2);
     scene.add(hemi);
-    // Gallery picture light — a warm pool centered above the piece,
-    // falling off toward the corners of the wall
+    // Room key light from the upper left — throws the frame's big soft
+    // shadow down-right across the wall, the way a deep box actually would
     const key = new THREE.SpotLight(0xffefd9, 0);
-    key.position.set(0.7, 3.6, 3.0);
-    key.target.position.set(0, 0.5, 0);
+    key.position.set(-2.1, 3.5, 2.3);
+    key.target.position.set(0, 0.3, 0);
     scene.add(key.target);
-    key.angle = 0.55;
-    key.penumbra = 0.95;
+    key.angle = 0.62;
+    key.penumbra = 0.92;
     key.decay = 1.3;
     key.distance = 0;
     key.castShadow = true;
@@ -98,7 +98,7 @@ export default function WallScene3D({ light, art }: Props) {
     key.shadow.camera.far = 14;
     key.shadow.bias = -0.0003;
     key.shadow.normalBias = 0.02;
-    key.shadow.radius = 4;
+    key.shadow.radius = 6;
     scene.add(key);
     const fill = new THREE.DirectionalLight(0xffffff, 0);
     fill.position.set(2.6, 1.2, 3.4);
@@ -119,6 +119,29 @@ export default function WallScene3D({ light, art }: Props) {
     artGroup.position.set(0, 0.06, 0.715);
     artGroup.visible = false;
     scene.add(artGroup);
+
+    // Interior LED strip — four recessed spots along the top of the box
+    // casting scalloped pools down the back board and grounding every
+    // object inside with its own shadow (they ride inside artGroup, so
+    // they switch on with the piece)
+    for (const x of [-0.55, -0.185, 0.185, 0.55]) {
+      const led = new THREE.SpotLight(0xfff2e2, 4.5);
+      led.position.set(x, 0.56, -0.16);
+      led.target.position.set(x, -0.2, -0.5);
+      led.angle = 0.45;
+      led.penumbra = 0.5;
+      led.decay = 1.4;
+      led.distance = 0;
+      led.castShadow = true;
+      led.shadow.mapSize.set(1024, 1024);
+      led.shadow.camera.near = 0.1;
+      led.shadow.camera.far = 3;
+      led.shadow.bias = -0.0004;
+      led.shadow.normalBias = 0.01;
+      led.shadow.radius = 3;
+      artGroup.add(led);
+      artGroup.add(led.target);
+    }
 
     type Anim = {
       node: THREE.Object3D;
@@ -151,8 +174,8 @@ export default function WallScene3D({ light, art }: Props) {
         const p = clamp01((now - lightStart) / 1000 / LIGHT_DUR);
         const e = easeOut(p);
         key.intensity = 19 * e;
-        fill.intensity = 0.12 * e;
-        key.position.x = -1.3 + 2.0 * e;
+        fill.intensity = 0.08 * e;
+        key.position.x = -3.2 + 1.1 * e;
         if (p < 1) busy = true;
       }
 
@@ -190,19 +213,23 @@ export default function WallScene3D({ light, art }: Props) {
     new GLTFLoader().load("/art/macintosh_final.glb", (gltf) => {
       if (disposed) return;
 
-      const frameMat = new THREE.MeshStandardMaterial({
+      // satin-painted wood — the slight clearcoat is what reads as
+      // "white frame" instead of bare geometry
+      const frameMat = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
-        roughness: 0.5,
+        roughness: 0.42,
         metalness: 0,
-        envMapIntensity: 0.2,
+        clearcoat: 0.3,
+        clearcoatRoughness: 0.4,
+        envMapIntensity: 0.35,
       });
       const glassMat = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
         transparent: true,
-        opacity: 0.09,
-        roughness: 0.04,
+        opacity: 0.1,
+        roughness: 0.02,
         metalness: 0,
-        envMapIntensity: 1.1,
+        envMapIntensity: 1.6,
         depthWrite: false,
       });
 
