@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import type { CSSProperties } from "react";
 import { EASE } from "@/lib/timeline";
 import CanvasArt, { type ArtDesign } from "@/components/CanvasArt";
+import MacintoshArt3D from "./MacintoshArt3D";
 
 type Props = { active: boolean };
 
@@ -22,8 +23,8 @@ const PIECES: Piece[] = [
   {
     design: "arches",
     style: {
-      left: "34%",
-      top: "23%",
+      left: "32%",
+      top: "24%",
       width: "clamp(88px, 9vw, 150px)",
       aspectRatio: "10 / 13",
     },
@@ -34,26 +35,27 @@ const PIECES: Piece[] = [
     design: "typographic",
     framed: true,
     style: {
-      left: "67%",
-      top: "19%",
+      left: "70.5%",
+      top: "20%",
       width: "clamp(140px, 12vw, 200px)",
       aspectRatio: "10 / 13",
     },
     delay: 0.32,
     className: "hidden sm:block",
   },
-  // The founder's piece — framed Macintosh render, lands last, center stage
+  // The founder's piece — live 3D framed Macintosh, lands last, center stage,
+  // parts assembling into formation once the piece is on the wall
   {
     design: "macintosh",
     plain: true,
     style: {
-      left: "45%",
-      top: "20%",
-      width: "clamp(230px, 20vw, 320px)",
+      left: "42.5%",
+      top: "17%",
+      width: "clamp(280px, 26vw, 430px)",
       aspectRatio: "2400 / 1593",
     },
     delay: 0.64,
-    className: "max-sm:left-[39%]! max-sm:top-[24%]!",
+    className: "max-sm:left-[14%]! max-sm:top-[40%]!",
   },
 ];
 
@@ -87,8 +89,8 @@ export default function ArtworkLayer({ active }: Props) {
           />
 
           {piece.plain ? (
-            /* self-contained artwork image — the render carries its own frame */
-            <CanvasArt design={piece.design} />
+            /* live 3D artwork — the model carries its own frame */
+            <MacintoshArt3D active={active} />
           ) : piece.framed ? (
             /* gallery frame: moulding → mat → art → glass */
             <div
