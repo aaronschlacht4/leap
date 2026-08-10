@@ -55,7 +55,7 @@ export default function WallScene3D({ light, art }: Props) {
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.92;
+    renderer.toneMappingExposure = 1.0;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -73,27 +73,32 @@ export default function WallScene3D({ light, art }: Props) {
     // The wall — a physical white surface that receives real shadows
     const wall = new THREE.Mesh(
       new THREE.PlaneGeometry(40, 24),
-      new THREE.MeshStandardMaterial({ color: 0xf5f4f1, roughness: 0.96, metalness: 0, envMapIntensity: 0.1 })
+      new THREE.MeshStandardMaterial({ color: 0xedeae4, roughness: 0.97, metalness: 0, envMapIntensity: 0.04 })
     );
     wall.position.z = -0.012;
     wall.receiveShadow = true;
     scene.add(wall);
 
     // Lighting — ambient base always on; warm key builds during `light`
-    const hemi = new THREE.HemisphereLight(0xffffff, 0xd6d1c6, 0.5);
+    const hemi = new THREE.HemisphereLight(0xffffff, 0xb8b2a6, 0.42);
     scene.add(hemi);
-    const key = new THREE.DirectionalLight(0xffeed8, 0);
-    key.position.set(-3.5, 3.0, 3.2);
+    // Gallery picture light — a warm pool centered above the piece,
+    // falling off toward the corners of the wall
+    const key = new THREE.SpotLight(0xffefd9, 0);
+    key.position.set(0.7, 3.6, 3.0);
+    key.target.position.set(0, 0.5, 0);
+    scene.add(key.target);
+    key.angle = 0.55;
+    key.penumbra = 0.95;
+    key.decay = 1.3;
+    key.distance = 0;
     key.castShadow = true;
     key.shadow.mapSize.set(2048, 2048);
-    key.shadow.camera.left = -3;
-    key.shadow.camera.right = 3;
-    key.shadow.camera.top = 2.2;
-    key.shadow.camera.bottom = -2.2;
-    key.shadow.camera.near = 0.5;
-    key.shadow.camera.far = 12;
-    key.shadow.bias = -0.0004;
-    key.shadow.radius = 7;
+    key.shadow.camera.near = 1;
+    key.shadow.camera.far = 14;
+    key.shadow.bias = -0.0003;
+    key.shadow.normalBias = 0.02;
+    key.shadow.radius = 4;
     scene.add(key);
     const fill = new THREE.DirectionalLight(0xffffff, 0);
     fill.position.set(2.6, 1.2, 3.4);
@@ -145,9 +150,9 @@ export default function WallScene3D({ light, art }: Props) {
       if (lightStart !== null) {
         const p = clamp01((now - lightStart) / 1000 / LIGHT_DUR);
         const e = easeOut(p);
-        key.intensity = 1.6 * e;
-        fill.intensity = 0.3 * e;
-        key.position.x = -4.2 + 0.7 * e;
+        key.intensity = 19 * e;
+        fill.intensity = 0.12 * e;
+        key.position.x = -1.3 + 2.0 * e;
         if (p < 1) busy = true;
       }
 
@@ -186,10 +191,10 @@ export default function WallScene3D({ light, art }: Props) {
       if (disposed) return;
 
       const frameMat = new THREE.MeshStandardMaterial({
-        color: 0xf7f6f2,
-        roughness: 0.55,
+        color: 0xffffff,
+        roughness: 0.5,
         metalness: 0,
-        envMapIntensity: 0.35,
+        envMapIntensity: 0.2,
       });
       const glassMat = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
@@ -213,9 +218,9 @@ export default function WallScene3D({ light, art }: Props) {
           mesh.material = frameMat;
         } else if (/^beige 2$/i.test(mat.name)) {
           // the case plastic shipped colorless — classic Macintosh beige
-          mat.color.set(0xe6ddc8);
-          mat.roughness = 0.6;
-          mat.envMapIntensity = 0.3;
+          mat.color.set(0xdfd3b8);
+          mat.roughness = 0.55;
+          mat.envMapIntensity = 0.25;
         } else if (/glass/i.test(mat.name)) {
           mesh.material = glassMat;
           mesh.castShadow = false;
