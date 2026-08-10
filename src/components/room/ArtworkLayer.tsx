@@ -9,8 +9,10 @@ type Props = { active: boolean };
 
 type Piece = {
   design: ArtDesign;
-  /** framed = black gallery frame with a white mat; otherwise a deep canvas wrap */
+  /** framed = black gallery frame with a white mat; plain = the artwork
+   *  image carries its own frame; otherwise a deep canvas wrap */
   framed?: boolean;
+  plain?: boolean;
   style: CSSProperties;
   delay: number;
   className?: string;
@@ -20,8 +22,8 @@ const PIECES: Piece[] = [
   {
     design: "arches",
     style: {
-      left: "40%",
-      top: "22%",
+      left: "34%",
+      top: "23%",
       width: "clamp(88px, 9vw, 150px)",
       aspectRatio: "10 / 13",
     },
@@ -32,24 +34,26 @@ const PIECES: Piece[] = [
     design: "typographic",
     framed: true,
     style: {
-      left: "51%",
-      top: "18%",
-      width: "clamp(150px, 12.5vw, 205px)",
+      left: "67%",
+      top: "19%",
+      width: "clamp(140px, 12vw, 200px)",
       aspectRatio: "10 / 13",
     },
     delay: 0.32,
-    className: "max-sm:left-[42%]!",
+    className: "hidden sm:block",
   },
+  // The founder's piece — framed Macintosh render, lands last, center stage
   {
-    design: "sunline",
+    design: "macintosh",
+    plain: true,
     style: {
-      left: "66%",
-      top: "24%",
-      width: "clamp(80px, 8.2vw, 136px)",
-      aspectRatio: "10 / 13",
+      left: "45%",
+      top: "20%",
+      width: "clamp(230px, 20vw, 320px)",
+      aspectRatio: "2400 / 1593",
     },
     delay: 0.64,
-    className: "hidden sm:block",
+    className: "max-sm:left-[39%]! max-sm:top-[24%]!",
   },
 ];
 
@@ -82,7 +86,10 @@ export default function ArtworkLayer({ active }: Props) {
             }}
           />
 
-          {piece.framed ? (
+          {piece.plain ? (
+            /* self-contained artwork image — the render carries its own frame */
+            <CanvasArt design={piece.design} />
+          ) : piece.framed ? (
             /* gallery frame: moulding → mat → art → glass */
             <div
               className="relative h-full w-full"

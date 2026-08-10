@@ -5,7 +5,12 @@
  * and the product grid so the store sells exactly what the room wears.
  */
 
-export type ArtDesign = "arches" | "typographic" | "sunline" | "stillLife";
+export type ArtDesign =
+  | "arches"
+  | "typographic"
+  | "sunline"
+  | "stillLife"
+  | "macintosh";
 
 function Arches() {
   return (
@@ -74,11 +79,25 @@ function StillLife() {
   );
 }
 
+function Macintosh() {
+  return (
+    <div className="flex h-full w-full items-center justify-center bg-white">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/art/macintosh-1984.png"
+        alt="Macintosh 1984 — framed Macintosh with keyboard and mouse, labeled The Personal Computer"
+        className="h-auto w-full"
+      />
+    </div>
+  );
+}
+
 const DESIGNS: Record<ArtDesign, () => React.ReactElement> = {
   arches: Arches,
   typographic: Typographic,
   sunline: Sunline,
   stillLife: StillLife,
+  macintosh: Macintosh,
 };
 
 export default function CanvasArt({

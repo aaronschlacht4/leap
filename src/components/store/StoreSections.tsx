@@ -3,10 +3,10 @@
 import CanvasArt, { type ArtDesign } from "@/components/CanvasArt";
 
 const PRODUCTS: { name: string; price: string; design: ArtDesign; framed?: boolean }[] = [
+  { name: "Macintosh 1984", price: "$329", design: "macintosh" },
   { name: "Ambition Arches", price: "$189", design: "arches" },
   { name: "Make It Yours No. 1", price: "$209", design: "typographic", framed: true },
   { name: "Morning Light", price: "$189", design: "sunline" },
-  { name: "Still Life 02", price: "$229", design: "stillLife" },
 ];
 
 export default function StoreSections() {
