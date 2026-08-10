@@ -10,11 +10,11 @@ export const PHASES = [
   "blank", // pure white beneath the navbar
   "headline", // YOUR ROOM IS BORING
   "subline", // let's fix that.
-  "roomEmerge", // text fades, the flat white becomes a physical wall
-  "light", // sunlight sweeps the wall (window shadow before window)
-  "window", // window constructs itself into the wall
-  "furniture", // room assembles piece by piece
-  "art", // artwork arrives last
+  "roomEmerge", // text fades, the flat white becomes a physical 3D wall
+  "light", // sunlight builds across the wall, shadows appear
+  "window", // reserved — returns when the 3D window is supplied
+  "furniture", // reserved — returns when the 3D furniture is supplied
+  "art", // the framed piece hangs itself and assembles
   "done", // scroll unlocks, store is browsable
 ] as const;
 
@@ -26,10 +26,10 @@ export const PHASE_DURATIONS: Record<Phase, number> = {
   headline: 1150,
   subline: 1350,
   roomEmerge: 1050,
-  light: 900,
-  window: 1450,
-  furniture: 1600,
-  art: 1300,
+  light: 1400,
+  window: 250,
+  furniture: 250,
+  art: 3400,
   done: Infinity,
 };
 
