@@ -10,12 +10,10 @@ import { PHASES, PHASE_DURATIONS, type Phase, phaseIndex } from "./timeline";
  */
 export function useIntroPhase(skip = false) {
   const [idx, setIdx] = useState(skip ? PHASES.length - 1 : 0);
+  const effectiveIdx = skip ? PHASES.length - 1 : idx;
 
   useEffect(() => {
-    if (skip) {
-      setIdx(PHASES.length - 1);
-      return;
-    }
+    if (skip) return;
     if (idx >= PHASES.length - 1) return;
     const timer = setTimeout(
       () => setIdx((i) => Math.min(i + 1, PHASES.length - 1)),
@@ -24,7 +22,7 @@ export function useIntroPhase(skip = false) {
     return () => clearTimeout(timer);
   }, [idx, skip]);
 
-  const atLeast = useCallback((p: Phase) => idx >= phaseIndex(p), [idx]);
+  const atLeast = useCallback((p: Phase) => effectiveIdx >= phaseIndex(p), [effectiveIdx]);
 
-  return { phase: PHASES[idx], atLeast, done: idx >= PHASES.length - 1 };
+  return { phase: PHASES[effectiveIdx], atLeast, done: effectiveIdx >= PHASES.length - 1 };
 }

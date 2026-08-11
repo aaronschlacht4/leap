@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 const iconProps = {
   width: 18,
   height: 18,
@@ -32,12 +34,12 @@ export default function Navbar() {
         </div>
 
         {/* Center — wordmark */}
-        <a
+        <Link
           href="/"
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[17px] font-bold tracking-[0.34em] text-black"
         >
           LEAP
-        </a>
+        </Link>
 
         {/* Right — account / search / cart */}
         <div className="flex items-center gap-4 text-black md:gap-5">

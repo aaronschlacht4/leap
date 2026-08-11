@@ -5,7 +5,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { EASE } from "@/lib/timeline";
 import { useIntroPhase } from "@/lib/useIntroPhase";
 import IntroHeadline from "./IntroHeadline";
-import WallScene3D from "./room/WallScene3D";
+import MacintoshFilm from "./room/MacintoshFilm";
 
 /**
  * Orchestrates the intro: blank canvas → headline → 3D wall → light →
@@ -27,14 +27,18 @@ export default function Hero() {
   return (
     <section className="relative h-dvh w-full bg-white pt-14">
       <div className="relative h-full w-full overflow-hidden">
-        {/* The wall itself — a real 3D surface with real light */}
+        {/* The wall — a Blender-rendered film of the piece assembling
+            inside its lit gallery box */}
         <motion.div
           className="absolute inset-0"
           initial={{ opacity: 0 }}
           animate={atLeast("roomEmerge") ? { opacity: 1 } : {}}
           transition={{ duration: 1.6, ease: EASE }}
         >
-          <WallScene3D light={atLeast("light")} art={atLeast("art")} />
+          <MacintoshFilm
+            play={atLeast("light")}
+            skipToEnd={reduceMotion ?? false}
+          />
         </motion.div>
 
         <IntroHeadline
@@ -50,12 +54,12 @@ export default function Hero() {
           animate={done ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 1.2, delay: 0.4, ease: EASE }}
         >
-          <p className="text-[10px] font-medium tracking-[0.3em] text-neutral-300 md:text-[11px]">
+          <p className="text-[10px] font-medium tracking-[0.3em] text-neutral-300 md:text-[11px] md:text-neutral-600">
             THE WALL WAS FINE. THE ART MADE IT YOURS.
           </p>
           <a
             href="#shop"
-            className="pointer-events-auto border-b border-white pb-0.5 text-[11px] font-semibold tracking-[0.24em] text-white"
+            className="pointer-events-auto border-b border-white pb-0.5 text-[11px] font-semibold tracking-[0.24em] text-white md:border-black md:text-black"
           >
             SHOP THE COLLECTION
           </a>

@@ -84,7 +84,7 @@ function Macintosh() {
     <div className="flex h-full w-full items-center justify-center bg-white">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/art/macintosh-1984.png"
+        src="/art/macintosh-1984-render.png"
         alt="Macintosh 1984 — framed Macintosh with keyboard and mouse, labeled The Personal Computer"
         className="h-auto w-full"
       />
