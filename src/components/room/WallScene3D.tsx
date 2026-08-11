@@ -73,23 +73,23 @@ export default function WallScene3D({ light, art }: Props) {
     // The wall — a physical white surface that receives real shadows
     const wall = new THREE.Mesh(
       new THREE.PlaneGeometry(40, 24),
-      new THREE.MeshStandardMaterial({ color: 0xedeae4, roughness: 0.97, metalness: 0, envMapIntensity: 0.04 })
+      new THREE.MeshStandardMaterial({ color: 0xf0eeea, roughness: 0.97, metalness: 0, envMapIntensity: 0.04 })
     );
     wall.position.z = -0.012;
     wall.receiveShadow = true;
     scene.add(wall);
 
     // Lighting — ambient base always on; warm key builds during `light`
-    const hemi = new THREE.HemisphereLight(0xffffff, 0xb8b2a6, 0.2);
+    const hemi = new THREE.HemisphereLight(0xffffff, 0xd8d5cf, 0.4);
     scene.add(hemi);
-    // Room key light from the upper left — throws the frame's big soft
-    // shadow down-right across the wall, the way a deep box actually would
-    const key = new THREE.SpotLight(0xffefd9, 0);
+    // Soft room key from the upper left — reads as a large softbox:
+    // near-white wall, gentle frame shadow below-right
+    const key = new THREE.SpotLight(0xfff3e2, 0);
     key.position.set(-2.1, 3.5, 2.3);
     key.target.position.set(0, 0.3, 0);
     scene.add(key.target);
-    key.angle = 0.62;
-    key.penumbra = 0.92;
+    key.angle = 0.7;
+    key.penumbra = 0.98;
     key.decay = 1.3;
     key.distance = 0;
     key.castShadow = true;
@@ -98,20 +98,22 @@ export default function WallScene3D({ light, art }: Props) {
     key.shadow.camera.far = 14;
     key.shadow.bias = -0.0003;
     key.shadow.normalBias = 0.02;
-    key.shadow.radius = 6;
+    key.shadow.radius = 7;
     scene.add(key);
     const fill = new THREE.DirectionalLight(0xffffff, 0);
     fill.position.set(2.6, 1.2, 3.4);
     scene.add(fill);
 
-    const camera = new THREE.PerspectiveCamera(40, 1, 0.01, 100);
-    const FRAME_W = 2.9; // world width the frame needs on screen (with margin)
+    // ~40mm lens, slight off-axis angle — not straight-on
+    const camera = new THREE.PerspectiveCamera(30, 1, 0.01, 100);
+    const FRAME_W = 2.6; // world width the frame needs on screen (with margin)
     const placeCamera = () => {
       const aspect = camera.aspect;
-      const base = 5.1;
+      const base = 4.4;
       const forWidth = FRAME_W / (2 * Math.tan((camera.fov / 2) * Math.PI / 180) * aspect);
-      camera.position.set(0, 0, Math.max(base, forWidth));
-      camera.lookAt(0, 0, 0);
+      const d = Math.max(base, forWidth);
+      camera.position.set(0.45, 0.22, d);
+      camera.lookAt(0, 0.03, 0.3);
     };
 
     // The framed piece — hung on the wall, back flush against it
@@ -173,8 +175,8 @@ export default function WallScene3D({ light, art }: Props) {
       if (lightStart !== null) {
         const p = clamp01((now - lightStart) / 1000 / LIGHT_DUR);
         const e = easeOut(p);
-        key.intensity = 19 * e;
-        fill.intensity = 0.08 * e;
+        key.intensity = 13.5 * e;
+        fill.intensity = 0.15 * e;
         key.position.x = -3.2 + 1.1 * e;
         if (p < 1) busy = true;
       }
@@ -213,23 +215,20 @@ export default function WallScene3D({ light, art }: Props) {
     new GLTFLoader().load("/art/macintosh_final.glb", (gltf) => {
       if (disposed) return;
 
-      // satin-painted wood — the slight clearcoat is what reads as
-      // "white frame" instead of bare geometry
-      const frameMat = new THREE.MeshPhysicalMaterial({
+      // matte-painted white frame — clean, no showy reflections
+      const frameMat = new THREE.MeshStandardMaterial({
         color: 0xffffff,
-        roughness: 0.42,
+        roughness: 0.4,
         metalness: 0,
-        clearcoat: 0.3,
-        clearcoatRoughness: 0.4,
-        envMapIntensity: 0.35,
+        envMapIntensity: 0.25,
       });
       const glassMat = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
         transparent: true,
-        opacity: 0.1,
+        opacity: 0.05,
         roughness: 0.02,
         metalness: 0,
-        envMapIntensity: 1.6,
+        envMapIntensity: 0.25,
         depthWrite: false,
       });
 
