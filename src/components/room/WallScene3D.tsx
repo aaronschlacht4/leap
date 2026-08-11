@@ -67,26 +67,26 @@ export default function WallScene3D({ light, art }: Props) {
     mount.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xffffff);
+    scene.background = new THREE.Color(0x413c37);
     const pmrem = new THREE.PMREMGenerator(renderer);
     const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     scene.environment = envTex;
 
-    // The wall — a physical white surface that receives real shadows
+    // The wall — a dark museum wall; the piece carries its own light
     const wall = new THREE.Mesh(
       new THREE.PlaneGeometry(40, 24),
-      new THREE.MeshStandardMaterial({ color: 0xf0eeea, roughness: 0.97, metalness: 0, envMapIntensity: 0.04 })
+      new THREE.MeshStandardMaterial({ color: 0x575049, roughness: 0.97, metalness: 0, envMapIntensity: 0.03 })
     );
     wall.position.z = -0.012;
     wall.receiveShadow = true;
     scene.add(wall);
 
     // Lighting — ambient base always on; warm key builds during `light`
-    const hemi = new THREE.HemisphereLight(0xffffff, 0xd8d5cf, 0.45);
+    const hemi = new THREE.HemisphereLight(0xd8d2c8, 0x1f1c19, 0.28);
     scene.add(hemi);
-    // Soft room key from the upper left — reads as a large softbox:
-    // near-white wall, gentle frame shadow below-right
-    const key = new THREE.SpotLight(0xfff3e2, 0);
+    // Dim room accent from the upper left — just enough to model the
+    // frame's white exterior against the dark wall
+    const key = new THREE.SpotLight(0xffeeda, 0);
     key.position.set(-2.1, 3.5, 2.3);
     key.target.position.set(0, 0.3, 0);
     scene.add(key.target);
@@ -129,10 +129,10 @@ export default function WallScene3D({ light, art }: Props) {
     // object inside with its own shadow (they ride inside artGroup, so
     // they switch on with the piece)
     for (const x of [-0.55, -0.185, 0.185, 0.55]) {
-      const led = new THREE.SpotLight(0xfff4e6, 5.5);
+      const led = new THREE.SpotLight(0xfff4e6, 8);
       led.position.set(x, 0.56, -0.32);
       led.target.position.set(x, -0.15, -0.5);
-      led.angle = 0.42;
+      led.angle = 0.5;
       led.penumbra = 0.6;
       led.decay = 1.4;
       led.distance = 0;
@@ -146,6 +146,11 @@ export default function WallScene3D({ light, art }: Props) {
       artGroup.add(led);
       artGroup.add(led.target);
     }
+    // Light spilling out of the lit case onto the surrounding wall —
+    // the warm halo that makes the box read as the room's light source
+    const spill = new THREE.PointLight(0xfff0dd, 1.6, 5, 2);
+    spill.position.set(0, 0.1, 0.4);
+    artGroup.add(spill);
 
     type Anim = {
       node: THREE.Object3D;
@@ -177,8 +182,8 @@ export default function WallScene3D({ light, art }: Props) {
       if (lightStart !== null) {
         const p = clamp01((now - lightStart) / 1000 / LIGHT_DUR);
         const e = easeOut(p);
-        key.intensity = 13 * e;
-        fill.intensity = 0.15 * e;
+        key.intensity = 3.4 * e;
+        fill.intensity = 0.05 * e;
         key.position.x = -3.2 + 1.1 * e;
         if (p < 1) busy = true;
       }
@@ -349,12 +354,12 @@ export default function WallScene3D({ light, art }: Props) {
   return (
     <div className="absolute inset-0">
       <div ref={mountRef} className="absolute inset-0" />
-      {/* photographic vignette — keeps the corners from reading flat */}
+      {/* photographic vignette — darkens toward the corners of the room */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(130% 105% at 50% 42%, rgba(0,0,0,0) 62%, rgba(35,33,30,0.07) 100%)",
+            "radial-gradient(130% 105% at 50% 42%, rgba(0,0,0,0) 52%, rgba(12,11,10,0.35) 100%)",
         }}
       />
     </div>

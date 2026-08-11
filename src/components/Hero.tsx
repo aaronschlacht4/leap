@@ -50,12 +50,12 @@ export default function Hero() {
           animate={done ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 1.2, delay: 0.4, ease: EASE }}
         >
-          <p className="text-[10px] font-medium tracking-[0.3em] text-neutral-700 md:text-[11px]">
+          <p className="text-[10px] font-medium tracking-[0.3em] text-neutral-300 md:text-[11px]">
             THE WALL WAS FINE. THE ART MADE IT YOURS.
           </p>
           <a
             href="#shop"
-            className="pointer-events-auto border-b border-black pb-0.5 text-[11px] font-semibold tracking-[0.24em] text-black"
+            className="pointer-events-auto border-b border-white pb-0.5 text-[11px] font-semibold tracking-[0.24em] text-white"
           >
             SHOP THE COLLECTION
           </a>
