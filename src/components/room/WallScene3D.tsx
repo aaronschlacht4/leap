@@ -80,7 +80,7 @@ export default function WallScene3D({ light, art }: Props) {
     scene.add(wall);
 
     // Lighting — ambient base always on; warm key builds during `light`
-    const hemi = new THREE.HemisphereLight(0xffffff, 0xd8d5cf, 0.4);
+    const hemi = new THREE.HemisphereLight(0xffffff, 0xd8d5cf, 0.45);
     scene.add(hemi);
     // Soft room key from the upper left — reads as a large softbox:
     // near-white wall, gentle frame shadow below-right
@@ -127,11 +127,11 @@ export default function WallScene3D({ light, art }: Props) {
     // object inside with its own shadow (they ride inside artGroup, so
     // they switch on with the piece)
     for (const x of [-0.55, -0.185, 0.185, 0.55]) {
-      const led = new THREE.SpotLight(0xfff2e2, 4.5);
-      led.position.set(x, 0.56, -0.16);
-      led.target.position.set(x, -0.2, -0.5);
-      led.angle = 0.45;
-      led.penumbra = 0.5;
+      const led = new THREE.SpotLight(0xfff4e6, 5.5);
+      led.position.set(x, 0.56, -0.32);
+      led.target.position.set(x, -0.15, -0.5);
+      led.angle = 0.42;
+      led.penumbra = 0.6;
       led.decay = 1.4;
       led.distance = 0;
       led.castShadow = true;
@@ -140,7 +140,7 @@ export default function WallScene3D({ light, art }: Props) {
       led.shadow.camera.far = 3;
       led.shadow.bias = -0.0004;
       led.shadow.normalBias = 0.01;
-      led.shadow.radius = 3;
+      led.shadow.radius = 5;
       artGroup.add(led);
       artGroup.add(led.target);
     }
@@ -175,7 +175,7 @@ export default function WallScene3D({ light, art }: Props) {
       if (lightStart !== null) {
         const p = clamp01((now - lightStart) / 1000 / LIGHT_DUR);
         const e = easeOut(p);
-        key.intensity = 13.5 * e;
+        key.intensity = 13 * e;
         fill.intensity = 0.15 * e;
         key.position.x = -3.2 + 1.1 * e;
         if (p < 1) busy = true;
@@ -220,15 +220,17 @@ export default function WallScene3D({ light, art }: Props) {
         color: 0xffffff,
         roughness: 0.4,
         metalness: 0,
-        envMapIntensity: 0.25,
+        envMapIntensity: 0.15,
       });
+      // near-invisible — at 5% opacity the glass was laying a milky
+      // veil over the whole interior
       const glassMat = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
         transparent: true,
-        opacity: 0.05,
+        opacity: 0.02,
         roughness: 0.02,
         metalness: 0,
-        envMapIntensity: 0.25,
+        envMapIntensity: 0.15,
         depthWrite: false,
       });
 
@@ -243,17 +245,21 @@ export default function WallScene3D({ light, art }: Props) {
           // the frame shipped without a material — white-on-white gallery frame
           mesh.material = frameMat;
         } else if (/^beige 2$/i.test(mat.name)) {
-          // the case plastic shipped colorless — classic Macintosh beige
-          mat.color.set(0xdfd3b8);
-          mat.roughness = 0.55;
-          mat.envMapIntensity = 0.25;
+          // the case plastic shipped colorless — classic Macintosh tan
+          mat.color.set(0xd3c5a6);
+          mat.roughness = 0.5;
+          mat.envMapIntensity = 0.15;
         } else if (/glass/i.test(mat.name)) {
           mesh.material = glassMat;
           mesh.castShadow = false;
           mesh.receiveShadow = false;
           mesh.renderOrder = 20;
+        } else if (mat.name === "Screen") {
+          // the emissive-strength extension blows the screen to a white
+          // glow — pull it down so the desktop stays readable
+          mat.emissiveIntensity = 0.85;
         } else {
-          mat.envMapIntensity = 0.3;
+          mat.envMapIntensity = 0.15;
           if (/^Card /.test(mat.name)) {
             mat.transparent = true;
             mesh.castShadow = false;
