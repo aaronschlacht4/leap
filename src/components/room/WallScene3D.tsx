@@ -24,7 +24,9 @@ const PARTS: Array<{
   delay: number;
   dur: number;
 }> = [
-  { names: ["Main case", "Logo", "Screen.001"], offset: [0, 0.10, 0.55], spin: [0, -0.35, 0], delay: 1.0, dur: 1.1 },
+  // translation only — the case, logo, and screen have different pivots,
+  // so any spin makes the screen drift out of the bezel mid-flight
+  { names: ["Main case", "Logo", "Screen.001"], offset: [0, 0.12, 0.55], delay: 1.0, dur: 1.1 },
   { names: ["Floppy disk"], offset: [0.22, 0.05, 0.5], spin: [0, 0, 0.4], delay: 1.55, dur: 0.9 },
   { names: ["Keyboard", "keyboard Cable"], offset: [0, -0.32, 0.38], delay: 1.4, dur: 1.0 },
   { names: ["Mouse", "Mouse cable"], offset: [0.5, -0.08, 0.22], delay: 1.65, dur: 0.9 },
@@ -255,9 +257,12 @@ export default function WallScene3D({ light, art }: Props) {
           mesh.receiveShadow = false;
           mesh.renderOrder = 20;
         } else if (mat.name === "Screen") {
-          // the emissive-strength extension blows the screen to a white
-          // glow — pull it down so the desktop stays readable
-          mat.emissiveIntensity = 0.85;
+          // two separate blowouts here: the emissive-strength extension
+          // over-glows the desktop, and roughness 0 mirrors the interior
+          // LEDs as a white blob across the glass
+          mat.emissiveIntensity = 0.9;
+          mat.roughness = 0.45;
+          mat.envMapIntensity = 0;
         } else {
           mat.envMapIntensity = 0.15;
           if (/^Card /.test(mat.name)) {
@@ -273,6 +278,18 @@ export default function WallScene3D({ light, art }: Props) {
         gltf.scene.getObjectByName(name) ??
         gltf.scene.getObjectByName(name.replace(/[\s.]/g, "_")) ??
         gltf.scene.getObjectByName(name.replace(/\s/g, "_"));
+
+      // Composition to match the reference: the computer reads at real
+      // display scale, keyboard tucked close under the case, label close
+      // under the keyboard. (Adjust BEFORE the animation captures bases.)
+      const macGroup = findNode("Apple Macintosh 1984");
+      if (macGroup) macGroup.scale.multiplyScalar(1.15);
+      for (const name of ["Keyboard", "keyboard Cable", "Mouse", "Mouse cable"]) {
+        const n = findNode(name);
+        if (n) n.position.y += 0.045;
+      }
+      const labelCard = findNode("Card The Personal Computer");
+      if (labelCard) labelCard.position.y = -0.175;
 
       for (const part of PARTS) {
         for (const name of part.names) {
@@ -329,5 +346,17 @@ export default function WallScene3D({ light, art }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <div ref={mountRef} className="absolute inset-0" />;
+  return (
+    <div className="absolute inset-0">
+      <div ref={mountRef} className="absolute inset-0" />
+      {/* photographic vignette — keeps the corners from reading flat */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(130% 105% at 50% 42%, rgba(0,0,0,0) 62%, rgba(35,33,30,0.07) 100%)",
+        }}
+      />
+    </div>
+  );
 }
